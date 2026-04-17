@@ -1,0 +1,1587 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <link rel="manifest" href="/static/manifest.json" />
+    <link rel="icon" href="/static/icon.png" />
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#0f1117" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>💸 Finanzas Estudiantil</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --sidebar: #080a10;
+        --card: #161b2e;
+        --card2: #1e2540;
+        --border: #2a3050;
+        --accent: #4f7bf7;
+        --accent2: #7c5cf6;
+        --green: #22c55e;
+        --green2: #16a34a;
+        --red: #ef4444;
+        --red2: #dc2626;
+        --orange: #f97316;
+        --yellow: #eab308;
+        --text: #e2e8f0;
+        --text2: #94a3b8;
+        --white: #fff;
+        --nav-h: 60px;
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Segoe UI", system-ui, sans-serif;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ── Top bar (mobile) ── */
+      .topbar {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--sidebar);
+        padding: 0 16px;
+        height: var(--nav-h);
+        border-bottom: 1px solid var(--border);
+        flex-shrink: 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .topbar .logo {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .topbar .user {
+        font-size: 13px;
+        color: var(--text2);
+      }
+      .topbar .logout {
+        font-size: 13px;
+        color: var(--red);
+        text-decoration: none;
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--red);
+      }
+
+      /* ── Layout ── */
+      .layout {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* ── Sidebar (desktop) ── */
+      .sidebar {
+        width: 220px;
+        background: var(--sidebar);
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .sidebar .brand {
+        padding: 28px 20px 12px;
+        text-align: center;
+      }
+      .sidebar .brand .ico {
+        font-size: 36px;
+      }
+      .sidebar .brand h2 {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+        margin-top: 6px;
+      }
+      .sidebar .brand p {
+        font-size: 12px;
+        color: var(--text2);
+      }
+      .nav {
+        flex: 1;
+        padding: 8px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .nav a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 14px;
+        border-radius: 10px;
+        color: var(--text2);
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.15s;
+        cursor: pointer;
+      }
+      .nav a:hover {
+        background: var(--card2);
+        color: var(--text);
+      }
+      .nav a.active {
+        background: var(--accent);
+        color: var(--white);
+      }
+      .sidebar .bottom {
+        padding: 12px;
+      }
+      .sidebar .bottom a {
+        display: block;
+        padding: 10px 14px;
+        border-radius: 10px;
+        color: var(--red);
+        font-size: 13px;
+        text-decoration: none;
+        text-align: center;
+        border: 1px solid #450a0a;
+        transition: 0.15s;
+      }
+      .sidebar .bottom a:hover {
+        background: #450a0a33;
+      }
+
+      /* ── Content ── */
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .page {
+        display: none;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .page.active {
+        display: block;
+      }
+
+      /* ── Bottom nav (mobile) ── */
+      .bottomnav {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--sidebar);
+        border-top: 1px solid var(--border);
+        display: none;
+        align-items: center;
+        justify-content: space-around;
+        height: calc(var(--nav-h) + var(--safe-bottom));
+        padding-bottom: var(--safe-bottom);
+        z-index: 100;
+      }
+      .bnav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.15s;
+        color: var(--text2);
+        font-size: 10px;
+        border: none;
+        background: transparent;
+      }
+      .bnav-item .ico {
+        font-size: 20px;
+      }
+      .bnav-item.active {
+        color: var(--accent);
+      }
+
+      /* ── Mobile ── */
+      @media (max-width: 768px) {
+        .sidebar {
+          display: none;
+        }
+        .topbar {
+          display: flex;
+        }
+        .bottomnav {
+          display: flex;
+        }
+        .content {
+          margin-bottom: calc(var(--nav-h) + var(--safe-bottom));
+        }
+        .page {
+          padding: 14px;
+        }
+      }
+
+      /* ── Components ── */
+      .page-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+      .page-sub {
+        font-size: 13px;
+        color: var(--text2);
+        margin-bottom: 20px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 18px;
+      }
+      .card + .card {
+        margin-top: 14px;
+      }
+      .card-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 12px;
+      }
+      .grid3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      @media (max-width: 500px) {
+        .grid3 {
+          grid-template-columns: repeat(3, 1fr);
+          gap: 8px;
+        }
+      }
+      .metric {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px;
+      }
+      .metric .ico {
+        font-size: 22px;
+        margin-bottom: 6px;
+      }
+      .metric .lbl {
+        font-size: 11px;
+        color: var(--text2);
+        margin-bottom: 3px;
+      }
+      .metric .val {
+        font-size: 19px;
+        font-weight: 700;
+      }
+      @media (max-width: 400px) {
+        .metric .val {
+          font-size: 16px;
+        }
+      }
+      label,
+      .lbl-form {
+        display: block;
+        font-size: 12px;
+        color: var(--text2);
+        margin-bottom: 5px;
+        margin-top: 12px;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 11px 13px;
+        background: var(--card2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 15px;
+        outline: none;
+        transition: 0.2s;
+        appearance: none;
+        -webkit-appearance: none;
+      }
+      input:focus,
+      select:focus {
+        border-color: var(--accent);
+      }
+      select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+      }
+      .btn {
+        padding: 13px 18px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.15s;
+        white-space: nowrap;
+      }
+      .btn:active {
+        transform: scale(0.97);
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-green {
+        background: var(--green);
+        color: #fff;
+      }
+      .btn-red {
+        background: var(--red);
+        color: #fff;
+        padding: 7px 12px;
+        font-size: 13px;
+      }
+      .btn-sm {
+        padding: 7px 12px;
+        font-size: 13px;
+      }
+      .btn-full {
+        width: 100%;
+        margin-top: 16px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .badge-green {
+        background: #14532d33;
+        color: var(--green);
+        border: 1px solid #166534;
+      }
+      .badge-red {
+        background: #450a0a33;
+        color: var(--red);
+        border: 1px solid #7f1d1d;
+      }
+      .badge-orange {
+        background: #431407aa;
+        color: var(--orange);
+        border: 1px solid #7c2d12;
+      }
+      .row-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .row-item:last-child {
+        border-bottom: none;
+      }
+      .row-item .ico {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+        background: var(--card2);
+      }
+      .row-item .info {
+        flex: 1;
+        min-width: 0;
+      }
+      .row-item .info .name {
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .row-item .info .sub {
+        font-size: 12px;
+        color: var(--text2);
+      }
+      .row-item .amount {
+        font-size: 15px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .progress-bar {
+        height: 10px;
+        background: var(--card2);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-top: 6px;
+      }
+      .progress-bar .fill {
+        height: 100%;
+        border-radius: 20px;
+        transition: 0.4s;
+      }
+      .tip-box {
+        background: var(--card2);
+        border-left: 3px solid var(--yellow);
+        border-radius: 0 10px 10px 0;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        font-size: 13px;
+        color: var(--text);
+      }
+      .alert-box {
+        background: #431407aa;
+        border: 1px solid var(--orange);
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        font-size: 13px;
+        color: var(--orange);
+      }
+      .dias-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .dias-item {
+        background: var(--card2);
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+      }
+      .dias-item .dval {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 3px;
+      }
+      .dias-item .dlbl {
+        font-size: 11px;
+        color: var(--text2);
+      }
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 420px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+      .section-hdr {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+      .empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text2);
+        font-size: 14px;
+      }
+      .toast {
+        position: fixed;
+        bottom: calc(var(--nav-h) + 16px + var(--safe-bottom));
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #1e2540;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px 20px;
+        font-size: 14px;
+        opacity: 0;
+        transition: 0.3s;
+        z-index: 200;
+        white-space: nowrap;
+        pointer-events: none;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .canvas-wrap {
+        position: relative;
+        height: 220px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top bar mobile -->
+    <div class="topbar">
+      <span class="logo">💸 Finanzas</span>
+      <span class="user">{{ nombre.split(' ')[0] }}</span>
+      <a href="/logout" class="logout">Salir</a>
+    </div>
+
+    <div class="layout">
+      <!-- Sidebar desktop -->
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="ico">💸</div>
+          <h2>Finanzas Estudiantil</h2>
+          <p>{{ nombre }}</p>
+        </div>
+        <nav class="nav">
+          <a onclick="go('dashboard')" id="s-dashboard">🏠 Dashboard</a>
+          <a onclick="go('registrar')" id="s-registrar">➕ Registrar</a>
+          <a onclick="go('historial')" id="s-historial">📋 Historial</a>
+          <a onclick="go('presupuestos')" id="s-presupuestos"
+            >💰 Presupuestos</a
+          >
+          <a onclick="go('metas')" id="s-metas">🎯 Metas</a>
+          <a onclick="go('suscripciones')" id="s-suscripciones"
+            >📱 Suscripciones</a
+          >
+          <a onclick="go('graficas')" id="s-graficas">📊 Gráficas</a>
+        </nav>
+        <div class="bottom"><a href="/logout">🚪 Cerrar sesión</a></div>
+      </aside>
+
+      <!-- Main content -->
+      <main class="content">
+        <!-- ══ DASHBOARD ══ -->
+        <div class="page" id="p-dashboard">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 6px;
+            "
+          >
+            <div class="page-title" id="dash-title">Hola 👋</div>
+            <div style="display: flex; gap: 6px">
+              <select
+                id="dash-mes"
+                style="width: 120px; padding: 7px 10px; font-size: 13px"
+                onchange="loadDashboard()"
+              >
+                <option value="1">Enero</option>
+                <option value="2">Febrero</option>
+                <option value="3">Marzo</option>
+                <option value="4">Abril</option>
+                <option value="5">Mayo</option>
+                <option value="6">Junio</option>
+                <option value="7">Julio</option>
+                <option value="8">Agosto</option>
+                <option value="9">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+              </select>
+              <select
+                id="dash-anio"
+                style="width: 80px; padding: 7px 10px; font-size: 13px"
+                onchange="loadDashboard()"
+              ></select>
+            </div>
+          </div>
+
+          <div class="grid3" id="dash-metrics">
+            <div class="metric">
+              <div class="ico">⚖️</div>
+              <div class="lbl">Balance</div>
+              <div class="val" id="m-balance">—</div>
+            </div>
+            <div class="metric">
+              <div class="ico">📈</div>
+              <div class="lbl">Ingresos</div>
+              <div class="val" style="color: var(--green)" id="m-ing">—</div>
+            </div>
+            <div class="metric">
+              <div class="ico">📉</div>
+              <div class="lbl">Gastos</div>
+              <div class="val" style="color: var(--red)" id="m-gas">—</div>
+            </div>
+          </div>
+
+          <div class="card" id="dash-dias">
+            <div class="card-title">⏱️ Calculadora de días restantes</div>
+            <div class="dias-grid">
+              <div class="dias-item">
+                <div class="dval" id="d-disp">—</div>
+                <div class="dlbl">Disponible</div>
+              </div>
+              <div class="dias-item">
+                <div class="dval" id="d-dias">—</div>
+                <div class="dlbl">Días restantes</div>
+              </div>
+              <div class="dias-item">
+                <div class="dval" id="d-dia">—</div>
+                <div class="dlbl">Por día</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" id="dash-tips-card" style="margin-top: 14px">
+            <div class="card-title">💡 Tips personalizados</div>
+            <div id="dash-tips"></div>
+          </div>
+
+          <div
+            class="card"
+            id="dash-pres-card"
+            style="margin-top: 14px; display: none"
+          >
+            <div class="card-title">📊 Presupuestos del mes</div>
+            <div id="dash-pres"></div>
+          </div>
+
+          <div class="card" style="margin-top: 14px">
+            <div class="section-hdr">
+              <span class="card-title" style="margin: 0"
+                >🕐 Últimos movimientos</span
+              >
+              <button
+                class="btn btn-sm"
+                style="background: transparent; color: var(--accent)"
+                onclick="go('historial')"
+              >
+                Ver todos →
+              </button>
+            </div>
+            <div id="dash-trans"></div>
+          </div>
+
+          <div
+            id="dash-subs-card"
+            style="display: none; margin-top: 14px"
+          ></div>
+        </div>
+
+        <!-- ══ REGISTRAR ══ -->
+        <div class="page" id="p-registrar">
+          <div class="page-title">➕ Registrar</div>
+          <div class="page-sub">Menos de 5 segundos</div>
+          <div class="card">
+            <div style="display: flex; gap: 8px; margin-bottom: 18px">
+              <button
+                class="btn btn-full"
+                id="tipo-gasto"
+                onclick="setTipo('gasto')"
+                style="flex: 1; background: var(--red)"
+              >
+                📉 Gasto
+              </button>
+              <button
+                class="btn btn-full"
+                id="tipo-ingreso"
+                onclick="setTipo('ingreso')"
+                style="flex: 1; background: var(--card2); color: var(--text2)"
+              >
+                📈 Ingreso
+              </button>
+            </div>
+            <div class="lbl-form">Categoría</div>
+            <select id="r-cat"></select>
+            <div class="form-row">
+              <div>
+                <div class="lbl-form">Monto ($)</div>
+                <input
+                  type="number"
+                  id="r-monto"
+                  placeholder="0"
+                  inputmode="decimal"
+                  min="0"
+                />
+              </div>
+              <div>
+                <div class="lbl-form">Fecha</div>
+                <input type="date" id="r-fecha" />
+              </div>
+            </div>
+            <div class="lbl-form">Descripción (opcional)</div>
+            <input
+              type="text"
+              id="r-desc"
+              placeholder="Ej: almuerzo cafetería"
+            />
+            <button class="btn btn-primary btn-full" onclick="guardarTrans()">
+              ✅ Guardar
+            </button>
+            <button
+              class="btn btn-full"
+              style="
+                margin-top: 8px;
+                background: var(--card2);
+                color: var(--text2);
+              "
+              onclick="deshacer()"
+            >
+              ↩️ Deshacer último
+            </button>
+          </div>
+          <div
+            class="card"
+            style="margin-top: 14px; border-color: var(--orange)"
+          >
+            <div class="card-title" style="color: var(--orange)">
+              ☕ Modo gasto hormiga esta semana
+            </div>
+            <div
+              id="hormiga-val"
+              style="font-size: 22px; font-weight: 700; color: var(--orange)"
+            >
+              —
+            </div>
+            <div style="font-size: 12px; color: var(--text2); margin-top: 4px">
+              en café y snacks
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ HISTORIAL ══ -->
+        <div class="page" id="p-historial">
+          <div class="page-title">📋 Historial</div>
+          <div class="card" style="margin-bottom: 14px">
+            <div class="form-row">
+              <div>
+                <div class="lbl-form">Desde</div>
+                <input type="date" id="h-desde" />
+              </div>
+              <div>
+                <div class="lbl-form">Hasta</div>
+                <input type="date" id="h-hasta" />
+              </div>
+            </div>
+            <div style="margin-top: 10px; display: flex; gap: 8px">
+              <select
+                id="h-tipo"
+                style="flex: 1; padding: 10px; font-size: 14px"
+              >
+                <option value="">Todos</option>
+                <option value="ingreso">Ingresos</option>
+                <option value="gasto">Gastos</option>
+              </select>
+              <button class="btn btn-primary" onclick="loadHistorial()">
+                🔍 Filtrar
+              </button>
+            </div>
+          </div>
+          <div class="card"><div id="hist-list"></div></div>
+        </div>
+
+        <!-- ══ PRESUPUESTOS ══ -->
+        <div class="page" id="p-presupuestos">
+          <div class="page-title">💰 Presupuestos</div>
+          <div class="card">
+            <div class="card-title">🌐 Presupuesto global del mes</div>
+            <div style="display: flex; gap: 8px; align-items: flex-end">
+              <div style="flex: 1">
+                <div class="lbl-form">Límite mensual ($)</div>
+                <input
+                  type="number"
+                  id="pg-monto"
+                  placeholder="500000"
+                  inputmode="decimal"
+                />
+              </div>
+              <button
+                class="btn btn-primary"
+                style="margin-bottom: 0; height: 44px"
+                onclick="guardarGlobal()"
+              >
+                Guardar
+              </button>
+            </div>
+            <div id="pg-bar" style="margin-top: 14px; display: none"></div>
+          </div>
+          <div class="card" style="margin-top: 14px">
+            <div class="card-title">📂 Por categoría</div>
+            <div
+              style="
+                display: flex;
+                gap: 8px;
+                align-items: flex-end;
+                margin-bottom: 14px;
+              "
+            >
+              <div style="flex: 2">
+                <div class="lbl-form">Categoría</div>
+                <select id="pp-cat"></select>
+              </div>
+              <div style="flex: 1">
+                <div class="lbl-form">Límite ($)</div>
+                <input
+                  type="number"
+                  id="pp-monto"
+                  placeholder="50000"
+                  inputmode="decimal"
+                />
+              </div>
+              <button
+                class="btn btn-primary"
+                style="height: 44px; flex-shrink: 0"
+                onclick="agregarPresup()"
+              >
+                ➕
+              </button>
+            </div>
+            <div id="pres-list"></div>
+          </div>
+        </div>
+
+        <!-- ══ METAS ══ -->
+        <div class="page" id="p-metas">
+          <div class="page-title">🎯 Metas de Ahorro</div>
+          <div class="card">
+            <div class="card-title">Nueva meta</div>
+            <input
+              type="text"
+              id="mt-nombre"
+              placeholder="Ej: Viaje a la costa"
+              style="margin-bottom: 10px"
+            />
+            <div class="form-row">
+              <div>
+                <div class="lbl-form">Objetivo ($)</div>
+                <input
+                  type="number"
+                  id="mt-obj"
+                  placeholder="500000"
+                  inputmode="decimal"
+                />
+              </div>
+              <div>
+                <div class="lbl-form">Fecha límite</div>
+                <input type="date" id="mt-fecha" />
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="crearMeta()">
+              ➕ Crear meta
+            </button>
+          </div>
+          <div id="metas-list" style="margin-top: 14px"></div>
+        </div>
+
+        <!-- ══ SUSCRIPCIONES ══ -->
+        <div class="page" id="p-suscripciones">
+          <div class="page-title">📱 Suscripciones</div>
+          <div class="page-sub">Te avisamos 3 días antes del cobro</div>
+          <div class="card">
+            <div class="card-title">Nueva suscripción</div>
+            <input
+              type="text"
+              id="sub-nombre"
+              placeholder="Netflix, Spotify..."
+            />
+            <div class="form-row">
+              <div>
+                <div class="lbl-form">Monto ($)</div>
+                <input
+                  type="number"
+                  id="sub-monto"
+                  placeholder="18000"
+                  inputmode="decimal"
+                />
+              </div>
+              <div>
+                <div class="lbl-form">Día de cobro</div>
+                <input
+                  type="number"
+                  id="sub-dia"
+                  placeholder="15"
+                  min="1"
+                  max="31"
+                  inputmode="numeric"
+                />
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" onclick="agregarSub()">
+              ➕ Agregar
+            </button>
+          </div>
+          <div class="card" style="margin-top: 14px">
+            <div id="subs-list"></div>
+          </div>
+          <div
+            id="subs-total"
+            style="
+              margin-top: 10px;
+              text-align: center;
+              font-size: 13px;
+              color: var(--text2);
+            "
+          ></div>
+        </div>
+
+        <!-- ══ GRÁFICAS ══ -->
+        <div class="page" id="p-graficas">
+          <div class="page-title">📊 Gráficas</div>
+          <div class="card">
+            <div class="card-title">🍕 Gastos por categoría este mes</div>
+            <div class="canvas-wrap"><canvas id="chart-pie"></canvas></div>
+          </div>
+          <div class="card" style="margin-top: 14px">
+            <div class="card-title">📈 Evolución últimos 6 meses</div>
+            <div class="canvas-wrap"><canvas id="chart-bar"></canvas></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Bottom nav mobile -->
+    <nav class="bottomnav">
+      <button class="bnav-item" onclick="go('dashboard')" id="b-dashboard">
+        <span class="ico">🏠</span>Inicio
+      </button>
+      <button class="bnav-item" onclick="go('registrar')" id="b-registrar">
+        <span class="ico">➕</span>Registrar
+      </button>
+      <button class="bnav-item" onclick="go('historial')" id="b-historial">
+        <span class="ico">📋</span>Historial
+      </button>
+      <button
+        class="bnav-item"
+        onclick="go('presupuestos')"
+        id="b-presupuestos"
+      >
+        <span class="ico">💰</span>Presupuesto
+      </button>
+      <button class="bnav-item" onclick="go('metas')" id="b-metas">
+        <span class="ico">🎯</span>Metas
+      </button>
+      <button class="bnav-item" onclick="go('graficas')" id="b-graficas">
+        <span class="ico">📊</span>Gráficas
+      </button>
+    </nav>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      // ── Globals ──────────────────────────────────────────
+      let tipoActual = "gasto";
+      let historial = [];
+      let chartPie = null,
+        chartBar = null;
+      const hoy = new Date();
+      let mesSel = hoy.getMonth() + 1;
+      let anioSel = hoy.getFullYear();
+
+      // ── Utils ─────────────────────────────────────────────
+      const fmt = (v) => "$" + Math.round(v).toLocaleString("es-CO");
+      const get = (id) => document.getElementById(id);
+
+      function toast(msg, ok = true) {
+        const el = get("toast");
+        el.textContent = msg;
+        el.style.background = ok ? "#14532d" : "#450a0a";
+        el.style.borderColor = ok ? "#22c55e" : "#ef4444";
+        el.classList.add("show");
+        setTimeout(() => el.classList.remove("show"), 2500);
+      }
+
+      async function api(url, method = "GET", body = null) {
+        const opts = {
+          method,
+          headers: { "Content-Type": "application/json" },
+        };
+        if (body) opts.body = JSON.stringify(body);
+        const r = await fetch(url, opts);
+        return r.json();
+      }
+
+      // ── Navegación ────────────────────────────────────────
+      function go(page) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".nav a")
+          .forEach((a) => a.classList.remove("active"));
+        document
+          .querySelectorAll(".bnav-item")
+          .forEach((b) => b.classList.remove("active"));
+        get("p-" + page).classList.add("active");
+        const si = get("s-" + page);
+        if (si) si.classList.add("active");
+        const bi = get("b-" + page);
+        if (bi) bi.classList.add("active");
+        const loaders = {
+          dashboard: loadDashboard,
+          historial: loadHistorial,
+          presupuestos: loadPresupuestos,
+          metas: loadMetas,
+          suscripciones: loadSubs,
+          graficas: loadGraficas,
+          registrar: loadRegistrar,
+        };
+        if (loaders[page]) loaders[page]();
+      }
+
+      // ── Init años selector ────────────────────────────────
+      function initAnios() {
+        const sel = get("dash-anio");
+        for (let y = 2023; y <= 2030; y++) {
+          const o = document.createElement("option");
+          o.value = y;
+          o.textContent = y;
+          if (y === anioSel) o.selected = true;
+          sel.appendChild(o);
+        }
+      }
+
+      // ══ DASHBOARD ════════════════════════════════════════
+      async function loadDashboard() {
+        mesSel = parseInt(get("dash-mes").value);
+        anioSel = parseInt(get("dash-anio").value);
+        const d = await api(`/api/dashboard?mes=${mesSel}&anio=${anioSel}`);
+
+        get("dash-title").textContent =
+          `Hola, {{ nombre.split(' ')[0] }} 👋 — ${d.nombre_mes} ${d.anio}`;
+
+        // Métricas
+        const balCol = d.resumen.balance >= 0 ? "var(--green)" : "var(--red)";
+        get("m-balance").style.color = balCol;
+        get("m-balance").textContent = fmt(d.resumen.balance);
+        get("m-ing").textContent = fmt(d.resumen.ingresos);
+        get("m-gas").textContent = fmt(d.resumen.gastos);
+
+        // Días
+        const disp = d.dias.disponible;
+        get("d-disp").textContent = fmt(disp);
+        get("d-disp").style.color = disp >= 0 ? "var(--green)" : "var(--red)";
+        get("d-dias").textContent = d.dias.dias_restantes;
+        get("d-dia").textContent = fmt(d.dias.presupuesto_dia);
+        get("d-dia").style.color = "var(--yellow)";
+
+        // Tips
+        const tb = get("dash-tips");
+        tb.innerHTML = d.tips
+          .map((t) => `<div class="tip-box">${t}</div>`)
+          .join("");
+
+        // Presupuestos
+        if (d.presupuestos.length) {
+          get("dash-pres-card").style.display = "block";
+          get("dash-pres").innerHTML = d.presupuestos
+            .map((p) => {
+              const pct = Math.min(p.gastado / p.monto_limite, 1) * 100;
+              const clr =
+                pct >= 100
+                  ? "var(--red)"
+                  : pct >= 85
+                    ? "var(--orange)"
+                    : "var(--green)";
+              return `<div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+          <span>${p.icono} ${p.nombre}</span>
+          <span style="color:${clr}">${fmt(p.gastado)} / ${fmt(p.monto_limite)}</span>
+        </div>
+        <div class="progress-bar"><div class="fill" style="width:${pct}%;background:${clr}"></div></div>
+      </div>`;
+            })
+            .join("");
+        }
+
+        // Transacciones recientes
+        const tl = get("dash-trans");
+        if (!d.transacciones.length) {
+          tl.innerHTML =
+            '<div class="empty">Sin movimientos registrados aún.</div>';
+        } else {
+          tl.innerHTML = d.transacciones
+            .map((t) => {
+              const sign = t.tipo === "ingreso" ? "+" : "−";
+              const clr = t.tipo === "ingreso" ? "var(--green)" : "var(--red)";
+              return `<div class="row-item">
+        <div class="ico">${t.icono}</div>
+        <div class="info"><div class="name">${t.categoria}</div>
+          <div class="sub">${t.descripcion || "—"} · ${t.fecha}</div></div>
+        <div class="amount" style="color:${clr}">${sign}${fmt(t.monto)}</div>
+      </div>`;
+            })
+            .join("");
+        }
+
+        // Suscripciones próximas
+        if (d.suscripciones.length) {
+          get("dash-subs-card").style.display = "block";
+          get("dash-subs-card").innerHTML = `
+      <div class="alert-box">
+        <strong>📱 Suscripciones próximas a cobrar:</strong><br>
+        ${d.suscripciones.map((s) => `• ${s.nombre} — ${fmt(s.monto)} el día ${s.dia_cobro}`).join("<br>")}
+      </div>`;
+        }
+      }
+
+      // ══ REGISTRAR ════════════════════════════════════════
+      async function loadRegistrar() {
+        const fecha = get("r-fecha");
+        if (!fecha.value) fecha.value = hoy.toISOString().split("T")[0];
+        await loadCats("gasto");
+        await loadHormiga();
+      }
+
+      async function loadCats(tipo) {
+        const cats = await api(`/api/categorias?tipo=${tipo}`);
+        const sel = get("r-cat");
+        sel.innerHTML = cats
+          .map((c) => `<option value="${c.id}">${c.icono} ${c.nombre}</option>`)
+          .join("");
+      }
+
+      async function loadHormiga() {
+        const d = await api(`/api/dashboard?mes=${mesSel}&anio=${anioSel}`);
+        // Buscar tip de hormiga
+        const tip = d.tips.find(
+          (t) => t.includes("hormiga") || t.includes("café"),
+        );
+        get("hormiga-val").textContent = tip
+          ? tip
+          : "Sin alertas esta semana ✅";
+      }
+
+      function setTipo(t) {
+        tipoActual = t;
+        get("tipo-gasto").style.background =
+          t === "gasto" ? "var(--red)" : "var(--card2)";
+        get("tipo-gasto").style.color = t === "gasto" ? "#fff" : "var(--text2)";
+        get("tipo-ingreso").style.background =
+          t === "ingreso" ? "var(--green)" : "var(--card2)";
+        get("tipo-ingreso").style.color =
+          t === "ingreso" ? "#fff" : "var(--text2)";
+        loadCats(t);
+      }
+
+      async function guardarTrans() {
+        const monto = parseFloat(get("r-monto").value);
+        if (!monto || monto <= 0) {
+          toast("Ingresa un monto válido.", false);
+          return;
+        }
+        const r = await api("/api/transacciones", "POST", {
+          tipo: tipoActual,
+          categoria_id: parseInt(get("r-cat").value),
+          monto,
+          descripcion: get("r-desc").value.trim(),
+          fecha: get("r-fecha").value || hoy.toISOString().split("T")[0],
+        });
+        if (r.ok) {
+          historial.push({
+            monto,
+            cat: get("r-cat").value,
+            tipo: tipoActual,
+            fecha: get("r-fecha").value,
+          });
+          get("r-monto").value = "";
+          get("r-desc").value = "";
+          toast(
+            `${tipoActual === "gasto" ? "Gasto" : "Ingreso"} de ${fmt(monto)} registrado ✅`,
+          );
+          loadHormiga();
+        } else toast("Error al guardar.", false);
+      }
+
+      async function deshacer() {
+        const last = historial.pop();
+        if (!last) {
+          toast("No hay acciones para deshacer.", false);
+          return;
+        }
+        const trans = await api("/api/transacciones");
+        const t = trans
+          .filter((x) => x.tipo === last.tipo && x.monto === last.monto)
+          .pop();
+        if (t) {
+          await api("/api/transacciones", "DELETE", { id: t.id });
+          toast("Última acción deshecha ↩️");
+        }
+      }
+
+      // ══ HISTORIAL ════════════════════════════════════════
+      async function loadHistorial() {
+        let url = "/api/transacciones?";
+        const d = get("h-desde").value,
+          h = get("h-hasta").value,
+          t = get("h-tipo").value;
+        if (d) url += `&desde=${d}`;
+        if (h) url += `&hasta=${h}`;
+        if (t) url += `&tipo=${t}`;
+        const trans = await api(url);
+        const el = get("hist-list");
+        if (!trans.length) {
+          el.innerHTML =
+            '<div class="empty">No hay transacciones con esos filtros.</div>';
+          return;
+        }
+        el.innerHTML = trans
+          .map((t) => {
+            const sign = t.tipo === "ingreso" ? "+" : "−";
+            const clr = t.tipo === "ingreso" ? "var(--green)" : "var(--red)";
+            return `<div class="row-item">
+      <div class="ico">${t.icono}</div>
+      <div class="info"><div class="name">${t.categoria}</div>
+        <div class="sub">${t.descripcion || "—"} · ${t.fecha}</div></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="amount" style="color:${clr}">${sign}${fmt(t.monto)}</div>
+        <button class="btn btn-red btn-sm" onclick="eliminarTrans(${t.id})">✕</button>
+      </div>
+    </div>`;
+          })
+          .join("");
+      }
+
+      async function eliminarTrans(id) {
+        if (!confirm("¿Eliminar esta transacción?")) return;
+        await api("/api/transacciones", "DELETE", { id });
+        toast("Transacción eliminada.");
+        loadHistorial();
+      }
+
+      // ══ PRESUPUESTOS ═════════════════════════════════════
+      async function loadPresupuestos() {
+        // Global
+        const pg = await api(
+          `/api/presupuesto-global?mes=${mesSel}&anio=${anioSel}`,
+        );
+        if (pg.monto_limite) get("pg-monto").value = pg.monto_limite;
+        const res = await api(`/api/dashboard?mes=${mesSel}&anio=${anioSel}`);
+        if (pg.monto_limite) {
+          const pct = Math.min(res.resumen.gastos / pg.monto_limite, 1) * 100;
+          const clr =
+            pct >= 100
+              ? "var(--red)"
+              : pct >= 85
+                ? "var(--orange)"
+                : "var(--green)";
+          const barEl = get("pg-bar");
+          barEl.style.display = "block";
+          barEl.innerHTML = `<div style="font-size:13px;color:var(--text2);margin-bottom:6px;">
+      Gastado: ${fmt(res.resumen.gastos)} / ${fmt(pg.monto_limite)} · Disponible: <strong style="color:${clr}">${fmt(pg.monto_limite - res.resumen.gastos)}</strong>
+    </div>
+    <div class="progress-bar"><div class="fill" style="width:${pct}%;background:${clr}"></div></div>`;
+        }
+        // Categorías en select
+        const cats = await api("/api/categorias?tipo=gasto");
+        get("pp-cat").innerHTML = cats
+          .map((c) => `<option value="${c.id}">${c.icono} ${c.nombre}</option>`)
+          .join("");
+        // Lista presupuestos
+        const prests = await api(
+          `/api/presupuestos?mes=${mesSel}&anio=${anioSel}`,
+        );
+        const el = get("pres-list");
+        if (!prests.length) {
+          el.innerHTML =
+            '<div class="empty">Sin presupuestos por categoría.</div>';
+          return;
+        }
+        el.innerHTML = prests
+          .map((p) => {
+            const pct = Math.min(p.gastado / p.monto_limite, 1) * 100;
+            const clr =
+              pct >= 100
+                ? "var(--red)"
+                : pct >= 85
+                  ? "var(--orange)"
+                  : "var(--green)";
+            return `<div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:14px;">${p.icono} ${p.nombre}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:${clr}">${fmt(p.gastado)}/${fmt(p.monto_limite)}</span>
+          <button class="btn btn-red btn-sm" onclick="eliminarPresup(${p.id})">✕</button>
+        </div>
+      </div>
+      <div class="progress-bar"><div class="fill" style="width:${pct}%;background:${clr}"></div></div>
+    </div>`;
+          })
+          .join("");
+      }
+
+      async function guardarGlobal() {
+        const m = parseFloat(get("pg-monto").value);
+        if (!m || m <= 0) {
+          toast("Ingresa un monto válido.", false);
+          return;
+        }
+        await api("/api/presupuesto-global", "POST", {
+          monto: m,
+          mes: mesSel,
+          anio: anioSel,
+        });
+        toast("Presupuesto global guardado ✅");
+        loadPresupuestos();
+      }
+
+      async function agregarPresup() {
+        const m = parseFloat(get("pp-monto").value);
+        if (!m || m <= 0) {
+          toast("Ingresa un monto válido.", false);
+          return;
+        }
+        await api("/api/presupuestos", "POST", {
+          categoria_id: parseInt(get("pp-cat").value),
+          monto: m,
+          mes: mesSel,
+          anio: anioSel,
+        });
+        get("pp-monto").value = "";
+        toast("Presupuesto agregado ✅");
+        loadPresupuestos();
+      }
+
+      async function eliminarPresup(id) {
+        await api("/api/presupuestos", "DELETE", { id });
+        toast("Eliminado.");
+        loadPresupuestos();
+      }
+
+      // ══ METAS ════════════════════════════════════════════
+      async function loadMetas() {
+        const metas = await api("/api/metas");
+        const el = get("metas-list");
+        if (!metas.length) {
+          el.innerHTML =
+            '<div class="empty">Aún no tienes metas. ¡Crea una!</div>';
+          return;
+        }
+        el.innerHTML = metas
+          .map((m) => {
+            const pct = Math.min(m.monto_actual / m.monto_objetivo, 1);
+            const clr = m.completada ? "var(--green)" : "var(--accent)";
+            const badge = m.completada
+              ? '<span class="badge badge-green">✅ Completada</span>'
+              : "";
+            return `<div class="card" style="margin-bottom:12px;border-color:${m.completada ? "var(--green)" : "var(--border)"}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-weight:600;font-size:15px;">${m.completada ? "✅" : "🎯"} ${m.nombre}</span>
+        <button class="btn btn-red btn-sm" onclick="eliminarMeta(${m.id})">🗑️</button>
+      </div>
+      ${badge}
+      <div class="progress-bar" style="margin:8px 0;"><div class="fill" style="width:${pct * 100}%;background:${clr}"></div></div>
+      <div style="font-size:13px;color:var(--text2);">${fmt(m.monto_actual)} / ${fmt(m.monto_objetivo)} (${Math.round(pct * 100)}%)
+        ${m.fecha_limite ? "· Límite: " + m.fecha_limite : ""}</div>
+      ${
+        !m.completada
+          ? `<div style="display:flex;gap:8px;margin-top:10px;">
+        <input type="number" id="ab-${m.id}" placeholder="Abonar $" style="flex:1;padding:9px;" inputmode="decimal">
+        <button class="btn btn-green" onclick="abonarMeta(${m.id})">💰 Abonar</button>
+      </div>`
+          : ""
+      }
+    </div>`;
+          })
+          .join("");
+      }
+
+      async function crearMeta() {
+        const nombre = get("mt-nombre").value.trim();
+        const obj = parseFloat(get("mt-obj").value);
+        if (!nombre || !obj || obj <= 0) {
+          toast("Completa los campos.", false);
+          return;
+        }
+        await api("/api/metas", "POST", {
+          nombre,
+          objetivo: obj,
+          fecha_limite: get("mt-fecha").value || null,
+        });
+        get("mt-nombre").value = "";
+        get("mt-obj").value = "";
+        get("mt-fecha").value = "";
+        toast("Meta creada 🎯");
+        loadMetas();
+      }
+
+      async function abonarMeta(id) {
+        const a = parseFloat(get("ab-" + id).value);
+        if (!a || a <= 0) {
+          toast("Monto inválido.", false);
+          return;
+        }
+        await api("/api/metas", "PUT", { id, aporte: a });
+        toast("Abono registrado 💰");
+        loadMetas();
+      }
+
+      async function eliminarMeta(id) {
+        if (!confirm("¿Eliminar esta meta?")) return;
+        await api("/api/metas", "DELETE", { id });
+        toast("Meta eliminada.");
+        loadMetas();
+      }
+
+      // ══ SUSCRIPCIONES ════════════════════════════════════
+      async function loadSubs() {
+        const subs = await api("/api/suscripciones");
+        const el = get("subs-list");
+        if (!subs.length) {
+          el.innerHTML =
+            '<div class="empty">Sin suscripciones registradas.</div>';
+          get("subs-total").textContent = "";
+          return;
+        }
+        const total = subs.reduce((a, s) => a + s.monto, 0);
+        get("subs-total").textContent =
+          `Total mensual en suscripciones: ${fmt(total)}`;
+        const hoyDia = new Date().getDate();
+        el.innerHTML = subs
+          .map((s) => {
+            const diff = s.dia_cobro - hoyDia;
+            const prox =
+              diff === 0
+                ? "🔴 HOY"
+                : diff > 0 && diff <= 3
+                  ? `⚠️ En ${diff} días`
+                  : `📅 Día ${s.dia_cobro}`;
+            const clr =
+              diff >= 0 && diff <= 3 ? "var(--orange)" : "var(--text2)";
+            return `<div class="row-item">
+      <div class="ico">📱</div>
+      <div class="info"><div class="name">${s.nombre}</div>
+        <div class="sub" style="color:${clr}">${prox}</div></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="amount" style="color:var(--red)">${fmt(s.monto)}</div>
+        <button class="btn btn-red btn-sm" onclick="eliminarSub(${s.id})">✕</button>
+      </div>
+    </div>`;
+          })
+          .join("");
+      }
+
+      async function agregarSub() {
+        const nombre = get("sub-nombre").value.trim();
+        const monto = parseFloat(get("sub-monto").value);
+        const dia = parseInt(get("sub-dia").value);
+        if (!nombre || !monto || !dia || dia < 1 || dia > 31) {
+          toast("Completa todos los campos.", false);
+          return;
+        }
+        await api("/api/suscripciones", "POST", {
+          nombre,
+          monto,
+          dia_cobro: dia,
+        });
+        get("sub-nombre").value = "";
+        get("sub-monto").value = "";
+        get("sub-dia").value = "";
+        toast("Suscripción agregada 📱");
+        loadSubs();
+      }
+
+      async function eliminarSub(id) {
+        await api("/api/suscripciones", "DELETE", { id });
+        toast("Eliminada.");
+        loadSubs();
+      }
+
+      // ══ GRÁFICAS ═════════════════════════════════════════
+      async function loadGraficas() {
+        const d = await api(`/api/graficas?mes=${mesSel}&anio=${anioSel}`);
+
+        // Pie
+        if (chartPie) {
+          chartPie.destroy();
+          chartPie = null;
+        }
+        if (d.por_categoria.length) {
+          chartPie = new Chart(get("chart-pie"), {
+            type: "doughnut",
+            data: {
+              labels: d.por_categoria.map((c) => c.nombre),
+              datasets: [
+                {
+                  data: d.por_categoria.map((c) => c.total),
+                  backgroundColor: d.por_categoria.map((c) => c.color),
+                  borderColor: "#161b2e",
+                  borderWidth: 2,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: "bottom",
+                  labels: { color: "#94a3b8", font: { size: 11 }, padding: 10 },
+                },
+              },
+            },
+          });
+        }
+
+        // Bar
+        if (chartBar) {
+          chartBar.destroy();
+          chartBar = null;
+        }
+        if (d.evolucion.length) {
+          chartBar = new Chart(get("chart-bar"), {
+            type: "bar",
+            data: {
+              labels: d.evolucion.map((e) => e.mes),
+              datasets: [
+                {
+                  label: "Ingresos",
+                  data: d.evolucion.map((e) => e.ingresos),
+                  backgroundColor: "#22c55e88",
+                  borderColor: "#22c55e",
+                  borderWidth: 2,
+                  borderRadius: 6,
+                },
+                {
+                  label: "Gastos",
+                  data: d.evolucion.map((e) => e.gastos),
+                  backgroundColor: "#ef444488",
+                  borderColor: "#ef4444",
+                  borderWidth: 2,
+                  borderRadius: 6,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { labels: { color: "#94a3b8" } } },
+              scales: {
+                x: {
+                  ticks: { color: "#94a3b8" },
+                  grid: { color: "#2a305022" },
+                },
+                y: {
+                  ticks: { color: "#94a3b8" },
+                  grid: { color: "#2a305022" },
+                },
+              },
+            },
+          });
+        }
+      }
+
+      // ── Inicialización ────────────────────────────────────
+      initAnios();
+      get("dash-mes").value = mesSel;
+      go("{{ pagina }}");
+    </script>
+  </body>
+</html>

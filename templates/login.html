@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Finanzas Estudiantil</title>
+<style>
+  :root {
+    --bg: #0f1117; --card: #161b2e; --card2: #1e2540;
+    --border: #2a3050; --accent: #4f7bf7; --accent2: #7c5cf6;
+    --green: #22c55e; --red: #ef4444; --text: #e2e8f0; --text2: #94a3b8;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif;
+         min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px; }
+  .wrap { width:100%; max-width:420px; }
+  .logo { text-align:center; margin-bottom:24px; }
+  .logo .ico { font-size:52px; }
+  .logo h1 { font-size:24px; font-weight:700; color:var(--text); margin-top:8px; }
+  .logo p  { font-size:13px; color:var(--text2); margin-top:4px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:28px 24px; }
+  .tabs { display:flex; gap:4px; margin-bottom:24px; background:var(--bg); border-radius:10px; padding:4px; }
+  .tab { flex:1; padding:10px; border:none; border-radius:8px; background:transparent;
+         color:var(--text2); font-size:14px; font-weight:500; cursor:pointer; transition:.2s; }
+  .tab.active { background:var(--accent); color:#fff; }
+  .panel { display:none; }
+  .panel.active { display:block; }
+  label { display:block; font-size:12px; color:var(--text2); margin-bottom:5px; margin-top:14px; }
+  input { width:100%; padding:12px 14px; background:var(--card2); border:1px solid var(--border);
+          border-radius:10px; color:var(--text); font-size:15px; outline:none; transition:.2s; }
+  input:focus { border-color:var(--accent); }
+  .btn { width:100%; margin-top:20px; padding:14px; border:none; border-radius:10px;
+         font-size:15px; font-weight:600; cursor:pointer; transition:.15s; }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:active { transform:scale(.98); }
+  .btn-green { background:var(--green); color:#fff; }
+  .msg { margin-top:12px; padding:10px 14px; border-radius:8px; font-size:13px; display:none; }
+  .msg.ok  { background:#14532d33; color:var(--green); border:1px solid #166534; }
+  .msg.err { background:#450a0a33; color:var(--red);   border:1px solid #7f1d1d; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <div class="ico">💸</div>
+    <h1>Finanzas Estudiantil</h1>
+    <p>Controla tu dinero, cumple tus metas</p>
+  </div>
+  <div class="card">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('login')">Iniciar sesión</button>
+      <button class="tab"        onclick="showTab('reg')">Crear cuenta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="panel active" id="login">
+      <label>Correo electrónico</label>
+      <input type="email" id="l-email" placeholder="tu@correo.com" autocomplete="email">
+      <label>Contraseña</label>
+      <input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
+      <button class="btn btn-primary" onclick="doLogin()">Ingresar</button>
+      <div class="msg" id="l-msg"></div>
+    </div>
+
+    <!-- REGISTRO -->
+    <div class="panel" id="reg">
+      <label>Nombre completo</label>
+      <input type="text" id="r-nombre" placeholder="Tu nombre">
+      <label>Correo electrónico</label>
+      <input type="email" id="r-email" placeholder="tu@correo.com" autocomplete="email">
+      <label>Contraseña</label>
+      <input type="password" id="r-pass" placeholder="Mínimo 6 caracteres">
+      <label>Confirmar contraseña</label>
+      <input type="password" id="r-pass2" placeholder="Repite la contraseña">
+      <button class="btn btn-green" onclick="doRegister()">Crear cuenta</button>
+      <div class="msg" id="r-msg"></div>
+    </div>
+  </div>
+</div>
+<script>
+function showTab(t) {
+  document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active', (t==='login'&&i===0)||(t==='reg'&&i===1)));
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active', (t==='login'&&i===0)||(t==='reg'&&i===1)));
+}
+function showMsg(id, text, ok) {
+  const el = document.getElementById(id);
+  el.textContent = text; el.className = 'msg ' + (ok ? 'ok' : 'err'); el.style.display='block';
+}
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+  if (!email || !pass) { showMsg('l-msg','Completa todos los campos.', false); return; }
+  const r = await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+  const d = await r.json();
+  if (d.ok) location.href='/dashboard';
+  else showMsg('l-msg', d.msg, false);
+}
+async function doRegister() {
+  const nombre = document.getElementById('r-nombre').value.trim();
+  const email  = document.getElementById('r-email').value.trim();
+  const pass   = document.getElementById('r-pass').value;
+  const pass2  = document.getElementById('r-pass2').value;
+  if (!nombre||!email||!pass||!pass2){showMsg('r-msg','Completa todos los campos.',false);return;}
+  if (pass!==pass2){showMsg('r-msg','Las contraseñas no coinciden.',false);return;}
+  if (pass.length<6){showMsg('r-msg','Mínimo 6 caracteres.',false);return;}
+  const r = await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nombre,email,password:pass})});
+  const d = await r.json();
+  showMsg('r-msg', d.msg, d.ok);
+  if (d.ok) setTimeout(()=>showTab('login'), 1500);
+}
+document.addEventListener('keydown', e => { if(e.key==='Enter') { if(document.getElementById('login').classList.contains('active')) doLogin(); else doRegister(); }});
+</script>
+</body>
+</html>
