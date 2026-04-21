@@ -533,6 +533,17 @@
     </style>
   </head>
   <body>
+    <body>
+      <!-- Todo tu contenido -->
+
+      <script>
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker
+            .register("/static/service-worker.js")
+            .then(() => console.log("Service Worker registrado"));
+        }
+      </script>
+    </body>
     <!-- Top bar mobile -->
     <div class="topbar">
       <span class="logo">💸 Finanzas</span>
@@ -1142,6 +1153,7 @@
 
       async function loadCats(tipo) {
         const cats = await api(`/api/categorias?tipo=${tipo}`);
+        const unicas = Array.from(new Map(cats.map((c) => [c.id, c])).values());
         const sel = get("r-cat");
         sel.innerHTML = cats
           .map((c) => `<option value="${c.id}">${c.icono} ${c.nombre}</option>`)
