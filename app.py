@@ -37,12 +37,13 @@ def init_db():
         fecha_registro TEXT DEFAULT (date('now'))
     )""")
     c.execute("""CREATE TABLE IF NOT EXISTS categorias (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nombre TEXT NOT NULL,
-        tipo TEXT NOT NULL CHECK(tipo IN ('ingreso','gasto')),
-        icono TEXT DEFAULT '💰',
-        color TEXT DEFAULT '#4f8ef7'
-    )""")
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    tipo TEXT NOT NULL CHECK(tipo IN ('ingreso','gasto')),
+    icono TEXT DEFAULT '💰',
+    color TEXT DEFAULT '#4f8ef7',
+    UNIQUE(nombre, tipo)          
+)""")
     c.execute("""CREATE TABLE IF NOT EXISTS transacciones (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         usuario_id INTEGER NOT NULL,
@@ -110,6 +111,7 @@ def init_db():
         ("Otro gasto","gasto","📦","#6b7280"),
     ]
     c.executemany("INSERT OR IGNORE INTO categorias (nombre,tipo,icono,color) VALUES (?,?,?,?)", cats)
+    #UNIQUE(nombre, tipo)
     conn.commit()
     conn.close()
 
