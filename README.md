@@ -56,16 +56,3 @@ FinanzasWeb/
 
 ---
 
-## 🌐 Despliegue en internet (opcional)
-
-Para que cualquier persona acceda desde su celular sin estar en la misma red:
-
-**Opción gratuita — Railway:**
-1. Sube el proyecto a GitHub
-2. Ve a railway.app → Deploy from GitHub
-3. Listo, obtienes una URL pública
-
-**Opción gratuita — Render:**
-1. Sube a GitHub
-2. Ve a render.com → New Web Service
-3. Build: `pip install flask`  |  Start: `python app.py`
